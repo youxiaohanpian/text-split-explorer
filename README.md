@@ -40,11 +40,13 @@ win11报错禁止运行激活脚本，
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 ```
 当前窗口有效，关掉 PowerShell 就恢复默认。安全性比较高
+
 Then, run the Streamlit app with:
 
 ```shell
 streamlit run splitter.py
 ```
+## 报错问题解决
 ```
 ERROR: Compiler cl cannot compile programs.
 ```
@@ -59,4 +61,77 @@ pip install langchain textsplit streamlit
 然后重装
 ```
 pip install -r requirements.txt
+```
+运行起来后页面中央报错：
+ModuleNotFoundError: No module named 'tiktoken'
+
+
+核心原因就是：你运行的这个 **text-split-explorer** 项目里，用到了 **tiktoken** 这个库（它是 OpenAI 出的一个 tokenizer 库，用来数 token 的），但你本地环境还没装。
+
+---
+
+## 🔧 解决办法
+
+在你的虚拟环境里装上 `tiktoken` 就行。
+
+### 1. 进入 venv
+
+如果你是在 **cmd** 里：
+
+```cmd
+C:\text-split-explorer\venv\Scripts\activate.bat
+```
+
+如果你在 **PowerShell**（且已设置 bypass）：
+
+```powershell
+.\venv\Scripts\Activate
+```
+
+---
+
+### 2. 安装 tiktoken
+
+```powershell
+pip install tiktoken
+```
+
+> 如果下载太慢，可以用清华源：
+
+```powershell
+pip install tiktoken -i https://pypi.tuna.tsinghua.edu.cn/simple
+```
+
+---
+
+### 3. 重新运行项目
+
+通常这个项目是用 Streamlit 跑的：
+
+```powershell
+streamlit run splitter.py
+```
+
+---
+
+## ⚡ 小贴士
+
+1. `tiktoken` 有时会拉编译包，建议先升级 pip：
+
+   ```powershell
+   python -m pip install --upgrade pip
+   ```
+
+2. 如果还是报错，可以先单独试安装：
+
+   ```powershell
+   pip install --upgrade setuptools wheel
+   pip install tiktoken
+   ```
+
+---
+
+## 运行命令
+```
+streamlit run splitter.py
 ```

@@ -2,7 +2,8 @@ import streamlit as st
 from langchain.text_splitter import RecursiveCharacterTextSplitter, CharacterTextSplitter, Language
 import code_snippets as code_snippets
 import tiktoken
-
+import csv
+import io
 
 # Streamlit UI
 st.title("Text Splitter Playground")
@@ -49,10 +50,8 @@ if length_function == "Characters":
 elif length_function == "Tokens":
     enc = tiktoken.get_encoding("cl100k_base")
 
-
     def length_function(text: str) -> int:
         return len(enc.encode(text))
-
 
     length_function_str = code_snippets.TOKEN_LENGTH
 else:
@@ -64,14 +63,12 @@ if splitter_choice == "Character":
         chunk_overlap=chunk_overlap,
         length_function=length_function_str
     )
-
 elif splitter_choice == "RecursiveCharacter":
     import_text = code_snippets.RECURSIVE_CHARACTER.format(
         chunk_size=chunk_size,
         chunk_overlap=chunk_overlap,
         length_function=length_function_str
     )
-
 elif "Language." in splitter_choice:
     import_text = code_snippets.LANGUAGE.format(
         chunk_size=chunk_size,
@@ -89,29 +86,54 @@ doc = st.text_area("Paste your text here:")
 
 # Split text button
 if st.button("Split Text"):
-    # Choose splitter
+    # Choose splitter and initialize it
     if splitter_choice == "Character":
-        splitter = CharacterTextSplitter(separator = "\n\n",
-                                         chunk_size=chunk_size, 
-                                         chunk_overlap=chunk_overlap,
-                                         length_function=length_function)
+        splitter = CharacterTextSplitter(
+            separator="\n\n",
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
+            length_function=length_function
+        )
     elif splitter_choice == "RecursiveCharacter":
-        splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, 
-                                                  chunk_overlap=chunk_overlap,
-                                         length_function=length_function)
+        splitter = RecursiveCharacterTextSplitter(
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
+            length_function=length_function
+        )
     elif "Language." in splitter_choice:
         language = splitter_choice.split(".")[1].lower()
-        splitter = RecursiveCharacterTextSplitter.from_language(language,
-                                                                chunk_size=chunk_size,
-                                                                chunk_overlap=chunk_overlap,
-                                         length_function=length_function)
+        splitter = RecursiveCharacterTextSplitter.from_language(
+            language,
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
+            length_function=length_function
+        )
     else:
         raise ValueError
+
     # Split the text
     splits = splitter.split_text(doc)
 
     # Display the splits
     for idx, split in enumerate(splits, start=1):
-        st.text_area(
-            f"Split {idx}", split, height=200
-        )
+        st.text_area(f"Split {idx}", split, height=200)
+
+    # Export CSV
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Page", "Text"])
+    for i, chunk in enumerate(splits, 1):
+        writer.writerow([i, chunk])
+
+    csv_data = output.getvalue()
+    output.close()
+
+    # Add BOM for UTF-8 to ensure Chinese characters display correctly in Excel
+    csv_data_with_bom = '\ufeff' + csv_data
+
+    st.download_button(
+        label="Download CSV",
+        data=csv_data_with_bom,
+        file_name="splits.csv",
+        mime="text/csv"
+    )
