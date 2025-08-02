@@ -6,13 +6,13 @@ import csv
 import io
 
 # Streamlit UI
-st.title("Text Splitter Playground")
-st.info("""Split a text into chunks using a **Text Splitter**. Parameters include:
+st.title("文本分割器")
+st.info("""使用**文本分割器**将文本分割成块。参数包括：
 
-- `chunk_size`: Max size of the resulting chunks (in either characters or tokens, as selected)
-- `chunk_overlap`: Overlap between the resulting chunks (in either characters or tokens, as selected)
-- `length_function`: How to measure lengths of chunks, examples are included for either characters or tokens
-- The type of the text splitter, this largely controls the separators used to split on
+- `chunk_size`：生成的块的最大大小（以所选的字符或标记为单位）
+- `chunk_overlap`：生成的块之间的重叠部分（以所选的字符或标记为单位）
+- `length_function`：如何测量块的长度，包含以字符或标记为单位的示例
+- 文本分割器的类型，这在很大程度上控制了用于分割的分隔符
 """)
 col1, col2, col3, col4 = st.columns([1, 1, 1, 2])
 
@@ -82,10 +82,10 @@ else:
 st.info(import_text)
 
 # Box for pasting text
-doc = st.text_area("Paste your text here:")
+doc = st.text_area("粘贴文本:")
 
 # Split text button
-if st.button("Split Text"):
+if st.button("分割"):
     # Choose splitter and initialize it
     if splitter_choice == "Character":
         splitter = CharacterTextSplitter(
@@ -116,7 +116,7 @@ if st.button("Split Text"):
 
     # Display the splits
     for idx, split in enumerate(splits, start=1):
-        st.text_area(f"Split {idx}", split, height=200)
+        st.text_area(f"分割部分 {idx}", split, height=200)
 
     # Export CSV
     output = io.StringIO()
@@ -132,7 +132,7 @@ if st.button("Split Text"):
     csv_data_with_bom = '\ufeff' + csv_data
 
     st.download_button(
-        label="Download CSV",
+        label="下载 CSV",
         data=csv_data_with_bom,
         file_name="splits.csv",
         mime="text/csv"

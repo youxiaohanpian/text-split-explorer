@@ -129,8 +129,11 @@ streamlit run splitter.py
    pip install tiktoken
    ```
 
----
-
+## 以管理员身份运行 PowerShell，然后执行，激活环境变量
+   ```
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+.\venv\Scripts\Activate
+   ```
 ## 运行命令
 ```
 streamlit run splitter.py
